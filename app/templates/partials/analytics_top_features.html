@@ -1,0 +1,40 @@
+<div>
+  <h3 class="text-lg font-semibold text-slate-900">Top 10 Predictive Features</h3>
+  <p class="text-sm text-slate-500">Average importance from the deployed lightweight ensemble.</p>
+  <div class="mt-6 h-80">
+    <canvas id="analytics-top-features-chart" aria-label="Top predictive features chart"></canvas>
+  </div>
+</div>
+<script>
+  (function () {
+    const payload = {{ payload | tojson }};
+    AttritionApp.renderChart("analytics-top-features-chart", {
+      type: "bar",
+      data: {
+        labels: payload.labels,
+        datasets: [{
+          data: payload.values,
+          backgroundColor: "#4338CA",
+          borderRadius: 10
+        }]
+      },
+      options: {
+        maintainAspectRatio: false,
+        indexAxis: "y",
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: "Relative importance (%)"
+            }
+          }
+        }
+      }
+    });
+  })();
+</script>

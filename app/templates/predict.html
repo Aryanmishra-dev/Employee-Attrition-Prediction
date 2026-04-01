@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="grid gap-6 xl:grid-cols-[1.1fr,0.9fr]">
+    <section class="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+      <div class="mb-6 rounded-xl border border-indigo-100 bg-indigo-50 p-4 text-sm text-slate-600">
+        The prediction form captures the core HR features requested in the instruction file. Any IBM dataset fields not shown here use dataset medians or fixed benchmark defaults server-side.
+      </div>
+      {% include "partials/predict_form.html" %}
+    </section>
+
+    <section class="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-semibold text-slate-900">Result Card</h3>
+          <p class="text-sm text-slate-500">Results will load below the form without a full page refresh.</p>
+        </div>
+      </div>
+      <div id="prediction-result" class="mt-6">
+        <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
+          <p class="text-sm text-slate-500">Submit an employee profile to see risk level, confidence, top feature drivers, and recommended HR actions.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+{% endblock %}

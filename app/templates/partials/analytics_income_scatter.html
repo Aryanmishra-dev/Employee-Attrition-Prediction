@@ -1,0 +1,62 @@
+<div>
+  <h3 class="text-lg font-semibold text-slate-900">Monthly Income vs Attrition</h3>
+  <p class="text-sm text-slate-500">Scatter plot of income against predicted attrition probability, colored by risk level.</p>
+  <div class="mt-6 h-[28rem]">
+    <canvas id="analytics-income-scatter-chart" aria-label="Monthly income attrition scatter plot"></canvas>
+  </div>
+</div>
+<script>
+  (function () {
+    const payload = {{ payload | tojson }};
+    AttritionApp.renderChart("analytics-income-scatter-chart", {
+      type: "scatter",
+      data: {
+        datasets: [
+          {
+            label: "Low Risk",
+            data: payload.datasets["Low Risk"],
+            backgroundColor: "rgba(16, 185, 129, 0.55)"
+          },
+          {
+            label: "Medium Risk",
+            data: payload.datasets["Medium Risk"],
+            backgroundColor: "rgba(245, 158, 11, 0.55)"
+          },
+          {
+            label: "High Risk",
+            data: payload.datasets["High Risk"],
+            backgroundColor: "rgba(244, 63, 94, 0.65)"
+          }
+        ]
+      },
+      options: {
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: "Monthly income"
+            }
+          },
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: "Attrition probability (%)"
+            }
+          }
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                const point = context.raw;
+                return context.dataset.label + ": " + point.employee_id + " (" + point.y + "%)";
+              }
+            }
+          }
+        }
+      }
+    });
+  })();
+</script>

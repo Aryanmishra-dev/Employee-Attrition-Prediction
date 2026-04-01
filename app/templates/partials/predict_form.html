@@ -1,0 +1,59 @@
+<form class="space-y-8" hx-post="/api/predict" hx-target="#{{ result_target }}" hx-swap="innerHTML" hx-indicator="#{{ indicator_id }}">
+  {% for section in form_sections %}
+    <fieldset class="rounded-xl border border-slate-100 bg-slate-50 p-5">
+      <legend class="px-2 text-lg font-semibold text-slate-900">{{ section.title }}</legend>
+      <p class="mt-1 text-sm text-slate-500">{{ section.description }}</p>
+      <div class="mt-5 grid gap-4 md:grid-cols-2">
+        {% for field in section.fields %}
+          {% if field.name == "JobRole" %}
+            <div id="{{ job_role_wrapper_id }}" class="space-y-2">
+              <label for="{{ field.name }}-{{ job_role_wrapper_id }}" class="block text-sm font-medium text-slate-700">{{ field.label }}</label>
+              <select id="{{ field.name }}-{{ job_role_wrapper_id }}" name="{{ field.name }}" aria-label="{{ field.label }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring focus:ring-indigo-200" {% if field.required %}required{% endif %}>
+                {% for option in field.options %}
+                  <option value="{{ option.value }}" {% if option.value == field.value %}selected{% endif %}>{{ option.label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          {% else %}
+            <div class="space-y-2">
+              <label for="{{ field.name }}-{{ job_role_wrapper_id }}" class="block text-sm font-medium text-slate-700">{{ field.label }}</label>
+              {% if field.type == "select" %}
+                <select id="{{ field.name }}-{{ job_role_wrapper_id }}" name="{{ field.name }}" aria-label="{{ field.label }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring focus:ring-indigo-200" {% if field.required %}required{% endif %}
+                  {% if field.name == "Department" %}
+                    hx-get="/api/options/job-roles"
+                    hx-trigger="change"
+                    hx-target="#{{ job_role_wrapper_id }}"
+                    hx-swap="outerHTML"
+                    hx-vals='{"wrapper_id": "{{ job_role_wrapper_id }}"}'
+                  {% endif %}>
+                  {% for option in field.options %}
+                    <option value="{{ option.value }}" {% if option.value == field.value %}selected{% endif %}>{{ option.label }}</option>
+                  {% endfor %}
+                </select>
+              {% else %}
+                <input id="{{ field.name }}-{{ job_role_wrapper_id }}" type="number" name="{{ field.name }}" aria-label="{{ field.label }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring focus:ring-indigo-200" {% if field.required %}required{% endif %} min="{{ field.min }}" max="{{ field.max }}" step="{{ field.step }}" value="{{ field.value }}" />
+              {% endif %}
+              {% if field.helper %}
+                <p class="text-xs text-slate-500">{{ field.helper }}</p>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </fieldset>
+  {% endfor %}
+
+  <div class="flex flex-col gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:items-center sm:justify-between">
+    <p class="text-sm text-slate-500">Submission uses HTMX and returns the result card below without a full page reload.</p>
+    <button type="submit" aria-label="Predict attrition risk" class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-indigo-700">
+      <span>Predict Attrition Risk</span>
+      <span id="{{ indicator_id }}" class="htmx-indicator ml-3 items-center gap-2 text-white/80">
+        <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4 animate-spin">
+          <circle cx="12" cy="12" r="9" class="stroke-white/30" stroke-width="3"></circle>
+          <path d="M21 12a9 9 0 0 0-9-9" class="stroke-white" stroke-width="3" stroke-linecap="round"></path>
+        </svg>
+        Loading
+      </span>
+    </button>
+  </div>
+</form>

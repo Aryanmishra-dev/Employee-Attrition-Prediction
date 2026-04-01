@@ -1,0 +1,157 @@
+{% macro nav_icon(name) -%}
+  {% if name == "home" %}
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-5 w-5 stroke-[1.8]">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5 12 3l9 7.5v9a1.5 1.5 0 0 1-1.5 1.5h-4.5v-6h-6v6H4.5A1.5 1.5 0 0 1 3 19.5v-9Z"/>
+    </svg>
+  {% elif name == "sparkles" %}
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-5 w-5 stroke-[1.8]">
+      <path stroke-linecap="round" stroke-linejoin="round" d="m12 3 1.4 3.6L17 8l-3.6 1.4L12 13l-1.4-3.6L7 8l3.6-1.4L12 3Zm6 9 1 2.5L21.5 15 19 16l-1 2.5L17 16l-2.5-1 2.5-.5L18 12Zm-12 2 1.2 3 3 .8-3 .8L6 22l-1.2-3-3-.8 3-.8L6 14Z"/>
+    </svg>
+  {% elif name == "table" %}
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-5 w-5 stroke-[1.8]">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 5.25h15A1.5 1.5 0 0 1 21 6.75v10.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.25V6.75a1.5 1.5 0 0 1 1.5-1.5Zm0 4.5H21M9 5.25v13.5"/>
+    </svg>
+  {% elif name == "chart" %}
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-5 w-5 stroke-[1.8]">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5h15M6.75 16.5V9.75m5.25 6.75V6.75m5.25 9.75V12"/>
+    </svg>
+  {% else %}
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-5 w-5 stroke-[1.8]">
+      <path stroke-linecap="round" stroke-linejoin="round" d="m9 12 2 2 4-4m5-2.25A8.25 8.25 0 1 1 3.75 12 8.25 8.25 0 0 1 20 7.75Z"/>
+    </svg>
+  {% endif %}
+{%- endmacro %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ page_title }} | Employee Attrition Prediction</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              indigoBrand: "#4338CA",
+              emeraldBrand: "#10B981",
+              amberBrand: "#F59E0B",
+              roseBrand: "#F43F5E",
+              slateBg: "#F8FAFC",
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script defer src="/app.js"></script>
+    <style>
+      .htmx-indicator {
+        display: none;
+      }
+      .htmx-request.htmx-indicator,
+      .htmx-request .htmx-indicator {
+        display: inline-flex;
+      }
+    </style>
+  </head>
+  <body class="bg-slateBg font-sans text-slate-800 antialiased">
+    <div class="min-h-screen">
+      <aside class="fixed inset-y-0 left-0 hidden w-72 border-r border-slate-200 bg-white lg:block">
+        <div class="flex h-20 items-center border-b border-slate-100 px-6">
+          <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigoBrand/10 text-indigoBrand">
+            {{ nav_icon("sparkles") }}
+          </div>
+          <div class="ml-3">
+            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">HR Analytics</p>
+            <h1 class="text-lg font-bold text-slate-900">Attrition Studio</h1>
+          </div>
+        </div>
+        <nav class="space-y-2 px-4 py-6">
+          {% for item in nav_items %}
+            <a href="{{ item.path }}" aria-label="{{ item.label }}" class="{% if current_path == item.path %}bg-indigoBrand text-white shadow-sm{% else %}text-slate-600 hover:bg-slate-100 hover:text-slate-900{% endif %} flex items-center rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200">
+              <span class="mr-3">{{ nav_icon(item.icon) }}</span>
+              <span>{{ item.label }}</span>
+            </a>
+          {% endfor %}
+        </nav>
+      </aside>
+
+      <div id="mobile-sidebar" class="fixed inset-0 z-40 hidden bg-slate-900/40 lg:hidden">
+        <div class="absolute inset-y-0 left-0 w-72 bg-white shadow-xl">
+          <div class="flex items-center justify-between border-b border-slate-100 px-5 py-5">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Menu</p>
+              <p class="text-lg font-bold text-slate-900">Attrition Studio</p>
+            </div>
+            <button type="button" aria-label="Close navigation" onclick="AttritionApp.toggleSidebar()" class="rounded-lg border border-slate-200 p-2 text-slate-600 transition-all duration-200 hover:bg-slate-100">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-5 w-5 stroke-[1.8]">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6 18 18M18 6 6 18"/>
+              </svg>
+            </button>
+          </div>
+          <nav class="space-y-2 px-4 py-6">
+            {% for item in nav_items %}
+              <a href="{{ item.path }}" aria-label="{{ item.label }}" class="{% if current_path == item.path %}bg-indigoBrand text-white shadow-sm{% else %}text-slate-600 hover:bg-slate-100 hover:text-slate-900{% endif %} flex items-center rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200">
+                <span class="mr-3">{{ nav_icon(item.icon) }}</span>
+                <span>{{ item.label }}</span>
+              </a>
+            {% endfor %}
+          </nav>
+        </div>
+        <button type="button" aria-label="Close navigation overlay" class="absolute inset-0 -z-10" onclick="AttritionApp.toggleSidebar()"></button>
+      </div>
+
+      <div class="lg:pl-72">
+        <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
+          <div class="flex items-center justify-between px-4 py-4 sm:px-6">
+            <div class="flex items-center gap-3">
+              <button type="button" aria-label="Open navigation" onclick="AttritionApp.toggleSidebar()" class="rounded-xl border border-slate-200 p-2 text-slate-600 transition-all duration-200 hover:bg-slate-100 lg:hidden">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-5 w-5 stroke-[1.8]">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 6.75h15M4.5 12h15m-15 5.25h15"/>
+                </svg>
+              </button>
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{{ page_title }}</p>
+                <h2 class="text-xl font-bold text-slate-900 sm:text-2xl">{{ page_subtitle }}</h2>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <button type="button" aria-label="Notifications" class="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 transition-all duration-200 hover:bg-slate-100">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-5 w-5 stroke-[1.8]">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 18a2.25 2.25 0 1 1-4.5 0M6.75 9.75a5.25 5.25 0 1 1 10.5 0c0 2.402.577 4.77 1.68 6.904.12.232-.043.521-.305.521H5.375c-.262 0-.425-.29-.305-.52A15.2 15.2 0 0 0 6.75 9.75Z"/>
+                </svg>
+              </button>
+              <div aria-label="User avatar placeholder" class="flex h-11 w-11 items-center justify-center rounded-full bg-indigoBrand text-sm font-bold text-white">
+                HR
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main class="px-4 py-6 pb-24 sm:px-6 lg:pb-8">
+          {% block content %}{% endblock %}
+        </main>
+      </div>
+
+      <nav class="fixed inset-x-4 bottom-4 z-30 grid grid-cols-5 gap-2 rounded-2xl border border-slate-200 bg-white/95 p-2 shadow-xl backdrop-blur lg:hidden">
+        {% for item in nav_items %}
+          <a href="{{ item.path }}" aria-label="{{ item.label }}" class="{% if current_path == item.path %}bg-indigoBrand text-white{% else %}text-slate-500{% endif %} flex flex-col items-center justify-center rounded-xl px-2 py-2 text-[11px] font-medium transition-all duration-200">
+            <span>{{ nav_icon(item.icon) }}</span>
+            <span class="mt-1">{{ item.label.split()[0] }}</span>
+          </a>
+        {% endfor %}
+      </nav>
+    </div>
+
+    <div id="modal-container"></div>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

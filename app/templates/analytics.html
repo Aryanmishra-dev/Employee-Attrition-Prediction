@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="space-y-6">
+    <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+        <p class="text-sm text-slate-500">Employees Tracked</p>
+        <p class="mt-2 text-3xl font-bold text-indigoBrand">{{ summary_stats.total_employees }}</p>
+      </div>
+      <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+        <p class="text-sm text-slate-500">High Risk</p>
+        <p class="mt-2 text-3xl font-bold text-roseBrand">{{ summary_stats.high_risk_count }}</p>
+      </div>
+      <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+        <p class="text-sm text-slate-500">Medium Risk</p>
+        <p class="mt-2 text-3xl font-bold text-amberBrand">{{ summary_stats.medium_risk_count }}</p>
+      </div>
+      <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+        <p class="text-sm text-slate-500">Retention Rate</p>
+        <p class="mt-2 text-3xl font-bold text-emeraldBrand">{{ summary_stats.retention_rate }}%</p>
+      </div>
+    </section>
+
+    <section class="grid gap-6 xl:grid-cols-2">
+      <div id="analytics-trends" hx-get="/api/analytics/trends?partial=1" hx-trigger="revealed" hx-swap="innerHTML" class="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+        <p class="text-sm text-slate-500">Loading trend chart...</p>
+      </div>
+      <div id="analytics-heatmap" hx-get="/api/analytics/department?partial=heatmap" hx-trigger="revealed" hx-swap="innerHTML" class="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+        <p class="text-sm text-slate-500">Loading department heatmap...</p>
+      </div>
+      <div id="analytics-top-features" hx-get="/api/analytics/top-features?partial=1" hx-trigger="revealed" hx-swap="innerHTML" class="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+        <p class="text-sm text-slate-500">Loading feature importance chart...</p>
+      </div>
+      <div id="analytics-age-groups" hx-get="/api/analytics/age-groups?partial=1" hx-trigger="revealed" hx-swap="innerHTML" class="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+        <p class="text-sm text-slate-500">Loading age group chart...</p>
+      </div>
+    </section>
+
+    <section id="analytics-income-scatter" hx-get="/api/analytics/income-scatter?partial=1" hx-trigger="revealed" hx-swap="innerHTML" class="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+      <p class="text-sm text-slate-500">Loading income scatter plot...</p>
+    </section>
+  </div>
+{% endblock %}

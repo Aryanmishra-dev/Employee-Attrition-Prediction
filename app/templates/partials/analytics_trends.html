@@ -1,0 +1,60 @@
+<div>
+  <h3 class="text-lg font-semibold text-slate-900">Attrition Rate Trend</h3>
+  <p class="text-sm text-slate-500">Average prediction probability and request volume across logged dates.</p>
+  <div class="mt-6 h-80">
+    <canvas id="analytics-trend-chart" aria-label="Attrition rate trend chart"></canvas>
+  </div>
+</div>
+<script>
+  (function () {
+    const payload = {{ payload | tojson }};
+    AttritionApp.renderChart("analytics-trend-chart", {
+      type: "line",
+      data: {
+        labels: payload.labels,
+        datasets: [
+          {
+            type: "line",
+            label: "Average attrition probability (%)",
+            data: payload.probability,
+            borderColor: "#4338CA",
+            backgroundColor: "rgba(67, 56, 202, 0.12)",
+            fill: true,
+            tension: 0.32
+          },
+          {
+            type: "bar",
+            label: "Prediction volume",
+            data: payload.volume,
+            backgroundColor: "rgba(16, 185, 129, 0.35)",
+            yAxisID: "y1",
+            borderRadius: 12
+          }
+        ]
+      },
+      options: {
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: "Probability (%)"
+            }
+          },
+          y1: {
+            beginAtZero: true,
+            position: "right",
+            grid: {
+              drawOnChartArea: false
+            },
+            title: {
+              display: true,
+              text: "Volume"
+            }
+          }
+        }
+      }
+    });
+  })();
+</script>

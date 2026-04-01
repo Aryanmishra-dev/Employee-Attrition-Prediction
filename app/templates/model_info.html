@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="space-y-6">
+    <section class="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+      <div class="grid gap-6 xl:grid-cols-[1.1fr,0.9fr]">
+        <div>
+          <h3 class="text-lg font-semibold text-slate-900">Model Architecture Summary</h3>
+          <div class="mt-4 space-y-3">
+            {% for item in model_summary %}
+              <div class="rounded-xl border border-slate-100 bg-slate-50 p-4 text-sm leading-6 text-slate-700">{{ item }}</div>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="rounded-xl border border-slate-100 bg-slate-50 p-5">
+          <h4 class="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">Thresholds</h4>
+          <div class="mt-4 space-y-3 text-sm text-slate-700">
+            <p><span class="font-semibold text-slate-900">Classification threshold:</span> {{ classification_threshold }}</p>
+            <p><span class="font-semibold text-slate-900">Medium risk threshold:</span> {{ medium_risk_threshold }}</p>
+            <p><span class="font-semibold text-slate-900">High risk threshold:</span> {{ high_risk_threshold }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+        <p class="text-sm text-slate-500">Accuracy</p>
+        <p class="mt-2 text-3xl font-bold text-indigoBrand">{{ (metrics.accuracy * 100) | round(1) }}%</p>
+      </div>
+      <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+        <p class="text-sm text-slate-500">Recall</p>
+        <p class="mt-2 text-3xl font-bold text-emeraldBrand">{{ (metrics.recall * 100) | round(1) }}%</p>
+      </div>
+      <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+        <p class="text-sm text-slate-500">Precision</p>
+        <p class="mt-2 text-3xl font-bold text-amberBrand">{{ (metrics.precision * 100) | round(1) }}%</p>
+      </div>
+      <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+        <p class="text-sm text-slate-500">F1 Score</p>
+        <p class="mt-2 text-3xl font-bold text-roseBrand">{{ (metrics.f1_score * 100) | round(1) }}%</p>
+      </div>
+      <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+        <p class="text-sm text-slate-500">AUC-ROC</p>
+        <p class="mt-2 text-3xl font-bold text-slate-900">{{ (metrics.auc_roc * 100) | round(1) }}%</p>
+      </div>
+    </section>
+
+    <section class="grid gap-6 xl:grid-cols-[0.95fr,1.05fr]">
+      <div class="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+        <h3 class="text-lg font-semibold text-slate-900">Confusion Matrix</h3>
+        <div class="mt-6 grid grid-cols-[auto,1fr,1fr] gap-3 text-sm">
+          <div></div>
+          <div class="rounded-xl bg-slate-100 p-3 text-center font-semibold text-slate-600">Predicted Stay</div>
+          <div class="rounded-xl bg-slate-100 p-3 text-center font-semibold text-slate-600">Predicted Leave</div>
+          <div class="flex items-center justify-center rounded-xl bg-slate-100 px-3 text-center font-semibold text-slate-600">Actual Stay</div>
+          <div class="rounded-xl bg-emerald-100 p-5 text-center">
+            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-emerald-700">True Negative</p>
+            <p class="mt-2 text-3xl font-bold text-emerald-700">{{ confusion_matrix[0][0] }}</p>
+          </div>
+          <div class="rounded-xl bg-amber-100 p-5 text-center">
+            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-amber-700">False Positive</p>
+            <p class="mt-2 text-3xl font-bold text-amber-700">{{ confusion_matrix[0][1] }}</p>
+          </div>
+          <div class="flex items-center justify-center rounded-xl bg-slate-100 px-3 text-center font-semibold text-slate-600">Actual Leave</div>
+          <div class="rounded-xl bg-amber-100 p-5 text-center">
+            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-amber-700">False Negative</p>
+            <p class="mt-2 text-3xl font-bold text-amber-700">{{ confusion_matrix[1][0] }}</p>
+          </div>
+          <div class="rounded-xl bg-rose-100 p-5 text-center">
+            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-rose-700">True Positive</p>
+            <p class="mt-2 text-3xl font-bold text-rose-700">{{ confusion_matrix[1][1] }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+        <h3 class="text-lg font-semibold text-slate-900">Dataset Overview</h3>
+        <div class="mt-6 grid gap-4 sm:grid-cols-2">
+          <div class="rounded-xl border border-slate-100 bg-slate-50 p-4">
+            <p class="text-sm text-slate-500">Total Records</p>
+            <p class="mt-2 text-2xl font-bold text-slate-900">{{ dataset_overview.total_records }}</p>
+          </div>
+          <div class="rounded-xl border border-slate-100 bg-slate-50 p-4">
+            <p class="text-sm text-slate-500">Raw Feature Count</p>
+            <p class="mt-2 text-2xl font-bold text-slate-900">{{ dataset_overview.feature_count }}</p>
+          </div>
+          <div class="rounded-xl border border-slate-100 bg-slate-50 p-4">
+            <p class="text-sm text-slate-500">Model Feature Count</p>
+            <p class="mt-2 text-2xl font-bold text-slate-900">{{ dataset_overview.model_feature_count }}</p>
+          </div>
+          <div class="rounded-xl border border-slate-100 bg-slate-50 p-4">
+            <p class="text-sm text-slate-500">Attrition Rate</p>
+            <p class="mt-2 text-2xl font-bold text-roseBrand">{{ dataset_overview.class_distribution.attrition_rate }}%</p>
+          </div>
+          <div class="rounded-xl border border-slate-100 bg-slate-50 p-4">
+            <p class="text-sm text-slate-500">Stay Class</p>
+            <p class="mt-2 text-2xl font-bold text-emeraldBrand">{{ dataset_overview.class_distribution.stay }}</p>
+          </div>
+          <div class="rounded-xl border border-slate-100 bg-slate-50 p-4">
+            <p class="text-sm text-slate-500">Attrition Class</p>
+            <p class="mt-2 text-2xl font-bold text-roseBrand">{{ dataset_overview.class_distribution.attrition }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+      <h3 class="text-lg font-semibold text-slate-900">Feature Importance Table</h3>
+      <div class="mt-6 overflow-hidden rounded-xl border border-slate-100">
+        <div class="max-h-[34rem] overflow-auto">
+          <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="sticky top-0 bg-slate-50 text-left text-slate-500">
+              <tr>
+                <th class="px-4 py-3 font-semibold">Rank</th>
+                <th class="px-4 py-3 font-semibold">Feature</th>
+                <th class="px-4 py-3 font-semibold">Importance</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              {% for item in feature_importances %}
+                <tr class="{% if loop.index0 % 2 == 0 %}bg-white{% else %}bg-slate-50/60{% endif %}">
+                  <td class="px-4 py-3 font-medium text-slate-900">{{ loop.index }}</td>
+                  <td class="px-4 py-3 text-slate-700">{{ item.label }}</td>
+                  <td class="px-4 py-3 text-slate-600">{{ (item.importance * 100) | round(2) }}%</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+      <h3 class="text-lg font-semibold text-slate-900">Training Methodology Notes</h3>
+      <div class="mt-5 grid gap-3">
+        {% for item in training_notes %}
+          <div class="rounded-xl border border-slate-100 bg-slate-50 p-4 text-sm leading-6 text-slate-700">{{ item }}</div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+{% endblock %}

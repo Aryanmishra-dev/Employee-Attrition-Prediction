@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="space-y-6">
+    <section class="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+      <div class="grid gap-6 xl:grid-cols-[0.95fr,1.05fr]">
+        <div>
+          <h3 class="text-lg font-semibold text-slate-900">Upload Employee CSV</h3>
+          <p class="mt-2 text-sm text-slate-500">Drag a CSV into the drop zone, preview the first five rows, then run a full batch score and download the results.</p>
+        </div>
+        <form class="space-y-4" enctype="multipart/form-data">
+          <label aria-label="Upload batch prediction CSV" class="flex min-h-[13rem] cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-indigo-200 bg-gradient-to-br from-indigo-50 to-white p-6 text-center transition-all duration-200 hover:border-indigo-300 hover:bg-indigo-50/70">
+            <span class="rounded-full bg-white p-3 text-indigoBrand shadow-sm">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-6 w-6 stroke-[1.8]">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V4.5m0 0L7.5 9m4.5-4.5L16.5 9M4.5 15.75V18A1.5 1.5 0 0 0 6 19.5h12A1.5 1.5 0 0 0 19.5 18v-2.25"/>
+              </svg>
+            </span>
+            <span class="mt-4 text-base font-semibold text-slate-900">Drop CSV here or click to browse</span>
+            <span class="mt-2 text-sm text-slate-500">Only <code>.csv</code> files are accepted.</span>
+            <input type="file" name="file" accept=".csv" aria-label="Choose CSV file" class="mt-4 block text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-indigoBrand file:px-4 file:py-2 file:font-semibold file:text-white hover:file:bg-indigo-700" />
+          </label>
+          <div class="flex flex-wrap gap-3">
+            <button type="button" aria-label="Preview uploaded CSV" hx-post="/api/batch-preview" hx-encoding="multipart/form-data" hx-target="#batch-preview" hx-swap="innerHTML" class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-all duration-200 hover:bg-slate-50">
+              Preview CSV
+            </button>
+            <button type="button" aria-label="Run batch prediction" hx-post="/api/batch-predict" hx-encoding="multipart/form-data" hx-target="#batch-results" hx-swap="outerHTML" class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-indigo-700">
+              Run Batch Prediction
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section id="batch-preview" class="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+      <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
+        <p class="text-sm text-slate-500">Preview rows will appear here after you upload a valid CSV.</p>
+      </div>
+    </section>
+
+    <section id="batch-results" class="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+      <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
+        <p class="text-sm text-slate-500">Batch prediction results will replace this panel once scoring completes.</p>
+      </div>
+    </section>
+  </div>
+{% endblock %}

@@ -1,0 +1,71 @@
+<section id="batch-results" class="space-y-6">
+  <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+    <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+      <p class="text-sm text-slate-500">Total Processed</p>
+      <p class="mt-2 text-3xl font-bold text-indigoBrand">{{ batch.total_processed }}</p>
+    </div>
+    <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+      <p class="text-sm text-slate-500">High Risk</p>
+      <p class="mt-2 text-3xl font-bold text-roseBrand">{{ batch.high_risk_count }}</p>
+    </div>
+    <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+      <p class="text-sm text-slate-500">Medium Risk</p>
+      <p class="mt-2 text-3xl font-bold text-amberBrand">{{ batch.medium_risk_count }}</p>
+    </div>
+    <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+      <p class="text-sm text-slate-500">Low Risk</p>
+      <p class="mt-2 text-3xl font-bold text-emeraldBrand">{{ batch.low_risk_count }}</p>
+    </div>
+    <div class="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+      <p class="text-sm text-slate-500">Average Probability</p>
+      <p class="mt-2 text-3xl font-bold text-slate-900">{{ (batch.average_attrition_probability * 100) | round(1) }}%</p>
+    </div>
+  </div>
+
+  <div class="rounded-xl border border-slate-100 bg-white p-6 shadow-sm" data-table-shell>
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div>
+        <h3 class="text-lg font-semibold text-slate-900">Batch Results</h3>
+        <p class="text-sm text-slate-500">Sort headers or filter rows inline. Download a CSV snapshot when you are ready.</p>
+      </div>
+      <div class="flex flex-col gap-3 sm:flex-row">
+        <input type="search" aria-label="Filter batch results" data-table-filter placeholder="Filter by employee, department, role..." class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring focus:ring-indigo-200 sm:w-72" />
+        <a href="{{ batch.download_url }}" aria-label="Download batch results CSV" class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-indigo-700">
+          Download Results as CSV
+        </a>
+      </div>
+    </div>
+    <div class="mt-6 overflow-hidden rounded-xl border border-slate-100">
+      <div class="max-h-[32rem] overflow-auto">
+        <table class="min-w-full divide-y divide-slate-200 text-sm" data-sortable-table>
+          <thead class="sticky top-0 bg-slate-50 text-left text-slate-500">
+            <tr>
+              <th class="cursor-pointer px-4 py-3 font-semibold" data-sort-key="employee_id">Employee ID</th>
+              <th class="cursor-pointer px-4 py-3 font-semibold" data-sort-key="department">Department</th>
+              <th class="cursor-pointer px-4 py-3 font-semibold" data-sort-key="job_role">Job Role</th>
+              <th class="cursor-pointer px-4 py-3 font-semibold" data-sort-key="risk_level">Risk Level</th>
+              <th class="cursor-pointer px-4 py-3 font-semibold" data-sort-key="probability">Probability</th>
+              <th class="px-4 py-3 font-semibold">Key Risk Factors</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            {% for row in batch.records %}
+              <tr class="{% if loop.index0 % 2 == 0 %}bg-white{% else %}bg-slate-50/60{% endif %} transition-all duration-200 hover:bg-indigo-50/50">
+                <td class="px-4 py-3 font-medium text-slate-900" data-cell-key="employee_id" data-sort-value="{{ row.employee_id }}"><a href="{{ row.profile_url }}" aria-label="Open employee profile {{ row.employee_id }}" class="transition-all duration-200 hover:text-indigo-700">{{ row.employee_id }}</a></td>
+                <td class="px-4 py-3 text-slate-600" data-cell-key="department" data-sort-value="{{ row.department }}">{{ row.department }}</td>
+                <td class="px-4 py-3 text-slate-600" data-cell-key="job_role" data-sort-value="{{ row.job_role }}">{{ row.job_role }}</td>
+                <td class="px-4 py-3" data-cell-key="risk_level" data-sort-value="{{ row.risk_level }}">
+                  <span class="{% if row.risk_level == 'High Risk' %}bg-rose-100 text-rose-700{% elif row.risk_level == 'Medium Risk' %}bg-amber-100 text-amber-700{% else %}bg-emerald-100 text-emerald-700{% endif %} inline-flex rounded-full px-3 py-1 text-xs font-semibold">
+                    {{ row.risk_level }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-slate-600" data-cell-key="probability" data-sort-value="{{ row.probability }}">{{ (row.probability * 100) | round(1) }}%</td>
+                <td class="px-4 py-3 text-slate-600">{{ row.key_risk_factors | join(", ") }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

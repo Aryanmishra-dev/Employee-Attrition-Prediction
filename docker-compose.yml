@@ -1,0 +1,16 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: employee-attrition
+    ports:
+      - "${HOST_PORT:-8000}:8000"
+    environment:
+      PORT: 8000
+      APP_RUNTIME_DATA_DIR: /app/app/data
+      HIGH_RISK_THRESHOLD: ${HIGH_RISK_THRESHOLD:-0.65}
+      MEDIUM_RISK_THRESHOLD: ${MEDIUM_RISK_THRESHOLD:-0.35}
+    volumes:
+      - ./app/data:/app/app/data
+    restart: unless-stopped

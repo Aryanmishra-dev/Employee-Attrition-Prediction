@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: employee-attrition-prediction
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: APP_RUNTIME_DATA_DIR
+        value: /app/app/data
+      - key: HIGH_RISK_THRESHOLD
+        sync: false
+      - key: MEDIUM_RISK_THRESHOLD
+        sync: false

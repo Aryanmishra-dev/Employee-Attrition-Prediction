@@ -1,0 +1,8 @@
+<div id="{{ wrapper_id }}" class="space-y-2">
+  <label for="JobRole-{{ wrapper_id }}" class="block text-sm font-medium text-slate-700">Job Role</label>
+  <select id="JobRole-{{ wrapper_id }}" name="JobRole" aria-label="Job Role" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring focus:ring-indigo-200" required>
+    {% for role in job_roles %}
+      <option value="{{ role }}" {% if role == selected_value %}selected{% endif %}>{{ role }}</option>
+    {% endfor %}
+  </select>
+</div>

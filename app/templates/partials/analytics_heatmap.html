@@ -1,0 +1,21 @@
+<div>
+  <h3 class="text-lg font-semibold text-slate-900">Department vs Risk Level Heatmap</h3>
+  <p class="text-sm text-slate-500">CSS grid heatmap comparing baseline counts by department and risk level.</p>
+  <div class="mt-6 overflow-hidden rounded-xl border border-slate-100">
+    <div class="grid grid-cols-[1.2fr,1fr,1fr,1fr] gap-px bg-slate-100 text-sm">
+      <div class="bg-slate-50 px-4 py-3 font-semibold text-slate-500">Department</div>
+      {% for label in heatmap.columns %}
+        <div class="bg-slate-50 px-4 py-3 text-center font-semibold text-slate-500">{{ label }}</div>
+      {% endfor %}
+      {% for row in heatmap.rows %}
+        <div class="bg-white px-4 py-4 font-medium text-slate-900">{{ row.department }}</div>
+        {% for cell in row.cells %}
+          <div class="flex min-h-[5rem] flex-col items-center justify-center px-3 py-4 text-center" style="{{ cell.style }}">
+            <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-700">{{ cell.label }}</span>
+            <span class="mt-2 text-2xl font-bold text-slate-900">{{ cell.value }}</span>
+          </div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+  </div>
+</div>

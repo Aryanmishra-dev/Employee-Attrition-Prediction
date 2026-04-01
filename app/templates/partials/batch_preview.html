@@ -1,0 +1,30 @@
+<div>
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h3 class="text-lg font-semibold text-slate-900">Batch Preview</h3>
+      <p class="text-sm text-slate-500">Showing the first {{ preview_rows | length }} rows from a {{ row_count }} row upload with {{ column_count }} columns.</p>
+    </div>
+  </div>
+  <div class="mt-6 overflow-hidden rounded-xl border border-slate-100">
+    <div class="max-h-[26rem] overflow-auto">
+      <table class="min-w-full divide-y divide-slate-200 text-sm">
+        <thead class="sticky top-0 bg-slate-50 text-left text-slate-500">
+          <tr>
+            {% for column in preview_columns %}
+              <th class="px-4 py-3 font-semibold">{{ column }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {% for row in preview_rows %}
+            <tr class="{% if loop.index0 % 2 == 0 %}bg-white{% else %}bg-slate-50/60{% endif %}">
+              {% for column in preview_columns %}
+                <td class="px-4 py-3 text-slate-600">{{ row[column] }}</td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
