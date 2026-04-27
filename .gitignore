@@ -1,4 +1,5 @@
 .DS_Store
+.env
 __pycache__/
 *.py[cod]
 *.pyo
@@ -12,6 +13,9 @@ test_venv/
 # Notebook and test caches
 .ipynb_checkpoints/
 .pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
 # Runtime artifacts
 app/data/batches/

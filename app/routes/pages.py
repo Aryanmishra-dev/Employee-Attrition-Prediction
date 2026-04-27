@@ -97,7 +97,7 @@ async def model_info_page(request: Request) -> HTMLResponse:
     context = base_context(
         request,
         "Model Info",
-        "Transparent documentation for stakeholders reviewing the ensemble and its performance.",
+        "Transparent documentation for stakeholders reviewing the model and its performance.",
     )
     context.update(request.app.state.analytics.get_model_info_context())
     return templates.TemplateResponse(request, "model_info.html", context)

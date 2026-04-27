@@ -1,6 +1,12 @@
+from __future__ import annotations
+
 import subprocess
-import venv
-import os
-venv.create("test_venv", with_pip=True)
-subprocess.run(["test_venv/bin/pip", "install", "-r", "requirements.txt"])
-subprocess.run(["du", "-sh", "test_venv"])
+import sys
+
+
+def main() -> None:
+    subprocess.run([sys.executable, "scripts/smoke_test.py"], check=True)
+
+
+if __name__ == "__main__":
+    main()

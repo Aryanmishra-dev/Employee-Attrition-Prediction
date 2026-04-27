@@ -84,7 +84,12 @@ def ensure_raw_input_frame(
 
 
 class AttritionPredictor:
-    def __init__(self, artifact_path: Path) -> None:
+    def __init__(
+        self,
+        artifact_path: Path,
+        medium_risk_threshold: float | None = None,
+        high_risk_threshold: float | None = None,
+    ) -> None:
         if not artifact_path.exists():
             raise FileNotFoundError(
                 f"Model artifact not found at {artifact_path}. Run scripts/train_model.py first."
@@ -107,11 +112,20 @@ class AttritionPredictor:
         self.model_summary = self.artifact["model_summary"]
         self.classification_threshold = float(self.artifact["classification_threshold"])
         self.medium_risk_threshold = float(
-            os.getenv("MEDIUM_RISK_THRESHOLD", self.artifact.get("medium_risk_threshold", 0.35))
+            medium_risk_threshold
+            if medium_risk_threshold is not None
+            else os.getenv("MEDIUM_RISK_THRESHOLD", self.artifact.get("medium_risk_threshold", 0.35))
         )
         self.high_risk_threshold = float(
-            os.getenv("HIGH_RISK_THRESHOLD", self.artifact.get("high_risk_threshold", 0.65))
+            high_risk_threshold
+            if high_risk_threshold is not None
+            else os.getenv("HIGH_RISK_THRESHOLD", self.artifact.get("high_risk_threshold", 0.65))
         )
+        if not 0 <= self.medium_risk_threshold <= self.high_risk_threshold <= 1:
+            raise ValueError(
+                "Risk thresholds must satisfy "
+                "0 <= medium_risk_threshold <= high_risk_threshold <= 1."
+            )
 
     def get_form_defaults(self) -> dict[str, Any]:
         defaults = {
@@ -144,12 +158,12 @@ class AttritionPredictor:
         raw_frame = ensure_raw_input_frame(raw_frame, self.raw_input_columns, self.defaults)
         model_frame = build_model_frame(raw_frame)
         feature_frame = model_frame.reindex(columns=self.feature_columns, fill_value=0)
-        
+
         # Manual Standard Scaling
         mean = np.array(self.scaler["mean"])
         scale = np.array(self.scaler["scale"])
         scaled_values = (feature_frame.values - mean) / scale
-        
+
         scaled_frame = pd.DataFrame(
             scaled_values, columns=self.feature_columns, index=feature_frame.index
         )

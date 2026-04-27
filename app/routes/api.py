@@ -11,13 +11,17 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
 
+from app.core.settings import Settings
 from app.models.schemas import (
     BatchPredictionRecord,
     BatchPredictionResponse,
     EmployeePredictionInput,
     PredictionResponse,
 )
-from app.services.constants import BATCH_REQUIRED_COLUMNS, build_form_sections, get_job_role_options
+from app.services.constants import (
+    BATCH_REQUIRED_COLUMNS,
+    get_job_role_options,
+)
 
 router = APIRouter()
 templates = Jinja2Templates(
@@ -58,12 +62,21 @@ def build_prediction_entry(
     raw_input: dict[str, Any],
     source: str,
     input_hash: str,
+    store_raw_input: bool = True,
 ) -> dict[str, Any]:
+    raw_snapshot = raw_input
+    if not store_raw_input:
+        raw_snapshot = {
+            key: raw_input.get(key)
+            for key in ("EmployeeNumber", "Department", "JobRole")
+            if key in raw_input
+        }
+
     return {
         "timestamp": datetime.now(UTC).isoformat(),
         "source": source,
         "input_hash": input_hash,
-        "raw_input": raw_input,
+        "raw_input": raw_snapshot,
         "output": predictor_output.model_dump(mode="json"),
     }
 
@@ -78,13 +91,44 @@ async def parse_single_prediction_payload(request: Request) -> dict[str, Any]:
     return clean_payload(payload)
 
 
-def preview_frame_from_upload(csv_file: UploadFile) -> pd.DataFrame:
+async def preview_frame_from_upload(csv_file: UploadFile, settings: Settings) -> pd.DataFrame:
     if not csv_file.filename or not csv_file.filename.lower().endswith(".csv"):
         raise ValueError("Only .csv uploads are supported for batch prediction.")
 
-    file_bytes = csv_file.file.read()
-    csv_file.file.seek(0)
-    return pd.read_csv(io.BytesIO(file_bytes))
+    if csv_file.content_type and csv_file.content_type not in {
+        "application/csv",
+        "application/octet-stream",
+        "application/vnd.ms-excel",
+        "text/csv",
+    }:
+        raise ValueError("Uploaded file must be a CSV document.")
+
+    payload = bytearray()
+    while True:
+        chunk = await csv_file.read(64 * 1024)
+        if not chunk:
+            break
+        payload.extend(chunk)
+        if len(payload) > settings.max_upload_bytes:
+            raise ValueError(
+                f"CSV upload exceeds the {settings.max_upload_bytes} byte limit."
+            )
+    await csv_file.seek(0)
+
+    if not payload:
+        raise ValueError("Uploaded CSV file is empty.")
+
+    frame = pd.read_csv(
+        io.BytesIO(payload),
+        nrows=settings.max_batch_rows + 1,
+    )
+    if frame.empty:
+        raise ValueError("Uploaded CSV file has no data rows.")
+    if len(frame) > settings.max_batch_rows:
+        raise ValueError(
+            f"CSV upload exceeds the {settings.max_batch_rows} row limit."
+        )
+    return frame
 
 
 def validate_batch_columns(frame: pd.DataFrame) -> list[str]:
@@ -103,6 +147,7 @@ async def predict_employee(request: Request) -> HTMLResponse | JSONResponse:
     explainer = request.app.state.explainer
     recommender = request.app.state.recommender
     storage = request.app.state.storage
+    settings = request.app.state.settings
 
     employee_payload = employee.model_dump()
     result_frame, raw_frame, scaled_frame = predictor.predict_records([employee_payload])
@@ -134,6 +179,7 @@ async def predict_employee(request: Request) -> HTMLResponse | JSONResponse:
                 raw_record,
                 source="single",
                 input_hash=predictor.hash_payload(raw_record),
+                store_raw_input=settings.store_raw_prediction_inputs,
             )
         ]
     )
@@ -147,10 +193,10 @@ async def predict_employee(request: Request) -> HTMLResponse | JSONResponse:
 @router.post("/batch-preview", response_class=HTMLResponse, response_model=None)
 async def batch_preview(request: Request, file: UploadFile = File(...)) -> HTMLResponse | JSONResponse:
     try:
-        frame = preview_frame_from_upload(file)
+        frame = await preview_frame_from_upload(file, request.app.state.settings)
     except ValueError as exc:
         return error_response(422, "Invalid Upload", str(exc))
-    except pd.errors.ParserError:
+    except (pd.errors.ParserError, UnicodeDecodeError):
         return error_response(422, "Invalid CSV", "Unable to parse the uploaded CSV file.")
 
     missing_columns = validate_batch_columns(frame)
@@ -176,10 +222,10 @@ async def batch_preview(request: Request, file: UploadFile = File(...)) -> HTMLR
 @router.post("/batch-predict", response_model=None)
 async def batch_predict(request: Request, file: UploadFile = File(...)) -> HTMLResponse | JSONResponse:
     try:
-        frame = preview_frame_from_upload(file)
+        frame = await preview_frame_from_upload(file, request.app.state.settings)
     except ValueError as exc:
         return error_response(422, "Invalid Upload", str(exc))
-    except pd.errors.ParserError:
+    except (pd.errors.ParserError, UnicodeDecodeError):
         return error_response(422, "Invalid CSV", "Unable to parse the uploaded CSV file.")
 
     missing_columns = validate_batch_columns(frame)
@@ -213,6 +259,7 @@ async def batch_predict(request: Request, file: UploadFile = File(...)) -> HTMLR
     explainer = request.app.state.explainer
     recommender = request.app.state.recommender
     storage = request.app.state.storage
+    settings = request.app.state.settings
 
     result_frame, raw_frame, scaled_frame = predictor.predict_records(validated_rows)
 
@@ -259,6 +306,7 @@ async def batch_predict(request: Request, file: UploadFile = File(...)) -> HTMLR
                 raw_record,
                 source="batch",
                 input_hash=predictor.hash_payload(raw_record),
+                store_raw_input=settings.store_raw_prediction_inputs,
             )
         )
         export_rows.append(
@@ -297,7 +345,10 @@ async def batch_predict(request: Request, file: UploadFile = File(...)) -> HTMLR
 
 @router.get("/batch-results/{batch_id}/download", response_model=None)
 async def download_batch_results(batch_id: str, request: Request) -> FileResponse | JSONResponse:
-    output_path = request.app.state.storage.get_batch_results_path(batch_id)
+    try:
+        output_path = request.app.state.storage.get_batch_results_path(batch_id)
+    except ValueError as exc:
+        return error_response(400, "Invalid Batch ID", str(exc))
     if not output_path.exists():
         return error_response(404, "Batch Not Found", "Requested batch result file does not exist.")
     return FileResponse(
@@ -331,10 +382,23 @@ async def add_employee_note(
     note: str = Form(...),
     author: str = Form("HR Partner"),
 ) -> HTMLResponse | JSONResponse:
-    if not note.strip():
+    normalized_note = note.strip()
+    if not normalized_note:
         return error_response(422, "Validation Error", "Note content cannot be empty.")
+    settings = request.app.state.settings
+    if len(normalized_note) > settings.max_note_chars:
+        return error_response(
+            422,
+            "Validation Error",
+            f"Note content cannot exceed {settings.max_note_chars} characters.",
+        )
 
-    notes = request.app.state.storage.add_employee_note(employee_id, note, author=author)
+    normalized_author = author.strip()[:80] or "HR Partner"
+    notes = request.app.state.storage.add_employee_note(
+        employee_id,
+        normalized_note,
+        author=normalized_author,
+    )
     context = {"request": request, "notes": notes}
     return templates.TemplateResponse(request, "partials/employee_notes.html", context)
 

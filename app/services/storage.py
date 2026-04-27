@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import threading
 import uuid
 from datetime import UTC, datetime
@@ -8,6 +9,8 @@ from pathlib import Path
 from typing import Any, Iterable
 
 import pandas as pd
+
+BATCH_ID_PATTERN = re.compile(r"^[a-f0-9]{12}$")
 
 
 def _json_default(value: Any) -> Any:
@@ -64,11 +67,28 @@ class AppStorage:
         return records
 
     def load_employee_notes(self, employee_id: str) -> list[dict[str, str]]:
-        if not self.notes_path.exists():
-            return []
-        with self.notes_path.open("r", encoding="utf-8") as handle:
-            payload = json.load(handle)
+        payload = self._load_notes_payload()
         return payload.get(str(employee_id), [])
+
+    def _load_notes_payload(self) -> dict[str, list[dict[str, str]]]:
+        if not self.notes_path.exists():
+            return {}
+        with self.notes_path.open("r", encoding="utf-8") as handle:
+            try:
+                payload = json.load(handle)
+            except json.JSONDecodeError:
+                return {}
+        return payload if isinstance(payload, dict) else {}
+
+    def _write_notes_payload(self, payload: dict[str, list[dict[str, str]]]) -> None:
+        temp_path = self.notes_path.with_name(
+            f".{self.notes_path.name}.{uuid.uuid4().hex}.tmp"
+        )
+        temp_path.write_text(
+            json.dumps(payload, indent=2, ensure_ascii=True),
+            encoding="utf-8",
+        )
+        temp_path.replace(self.notes_path)
 
     def add_employee_note(
         self, employee_id: str, note: str, author: str = "HR Partner"
@@ -79,11 +99,9 @@ class AppStorage:
             "note": note.strip(),
         }
         with self._lock:
-            with self.notes_path.open("r", encoding="utf-8") as handle:
-                payload = json.load(handle)
+            payload = self._load_notes_payload()
             payload.setdefault(str(employee_id), []).append(note_entry)
-            with self.notes_path.open("w", encoding="utf-8") as handle:
-                json.dump(payload, handle, indent=2, ensure_ascii=True)
+            self._write_notes_payload(payload)
         return payload[str(employee_id)]
 
     def save_batch_results(self, frame: pd.DataFrame) -> str:
@@ -93,4 +111,6 @@ class AppStorage:
         return batch_id
 
     def get_batch_results_path(self, batch_id: str) -> Path:
+        if not BATCH_ID_PATTERN.fullmatch(batch_id):
+            raise ValueError("Invalid batch identifier.")
         return self.batches_dir / f"{batch_id}.csv"

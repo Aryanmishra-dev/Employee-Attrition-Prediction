@@ -10,7 +10,6 @@ if str(ROOT_DIR) not in sys.path:
 import joblib
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
     accuracy_score,
@@ -139,15 +138,6 @@ def main() -> None:
         random_state=RANDOM_STATE,
     )
 
-    extra_trees_model = ExtraTreesClassifier(
-        n_estimators=400,
-        max_depth=10,
-        min_samples_leaf=2,
-        class_weight="balanced",
-        random_state=RANDOM_STATE,
-        n_jobs=1,
-    )
-
     logistic_model.fit(X_train_scaled, y_train)
 
     logistic_probabilities = predict_probability(logistic_model, X_test_scaled)
@@ -161,7 +151,7 @@ def main() -> None:
     logistic_importance = normalize_importance(
         pd.Series(logistic_model.coef_[0], index=X_train.columns)
     )
-    ensemble_importance = logistic_importance.sort_values(ascending=False)
+    feature_importance = logistic_importance.sort_values(ascending=False)
 
     feature_directions = (
         model_frame.corr(numeric_only=True)["Attrition"]
@@ -198,7 +188,7 @@ def main() -> None:
                 "importance": round(float(importance), 6),
                 "label": DISPLAY_LABELS.get(feature_name, feature_name),
             }
-            for feature_name, importance in ensemble_importance.items()
+            for feature_name, importance in feature_importance.items()
         ],
         "department_income_medians": raw_dataset.groupby("Department")["MonthlyIncome"]
         .median()
@@ -227,14 +217,14 @@ def main() -> None:
         "medium_risk_threshold": 0.35,
         "high_risk_threshold": 0.65,
         "model_summary": [
-            "Soft-voting ensemble combining Logistic Regression and Extra Trees classifiers.",
+            "Balanced Logistic Regression model served through a lightweight NumPy inference engine.",
             "Notebook-inspired preprocessing: binary mapping, one-hot encoding, six engineered HR features, then standard scaling.",
             "Class imbalance is handled with balanced class weights to keep the deployment artifact lightweight for serverless hosting.",
         ],
         "training_notes": [
             "IBM HR dataset split with an 80/20 stratified train-test split using random_state=42.",
             f"Decision threshold selected from the validation grid at {classification_threshold:.2f} to favor recall while keeping accuracy serviceable.",
-            "Feature importance is the mean of normalized Logistic Regression coefficients and Extra Trees importances.",
+            "Feature importance is derived from normalized Logistic Regression coefficient magnitudes.",
             f"Threshold selection snapshot: accuracy={threshold_metrics['accuracy']:.3f}, recall={threshold_metrics['recall']:.3f}, F1={threshold_metrics['f1']:.3f}.",
             f"Minority-class weighting ratio during training: {imbalance_ratio:.2f}.",
         ],
