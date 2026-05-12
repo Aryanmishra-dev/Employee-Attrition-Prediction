@@ -22,7 +22,7 @@
   {% endif %}
 {%- endmacro %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -33,13 +33,23 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
+        darkMode: "class",
         theme: {
           extend: {
             colors: {
-              indigoBrand: "#4338CA",
-              emeraldBrand: "#10B981",
-              amberBrand: "#F59E0B",
-              roseBrand: "#F43F5E",
+              primary: {
+                DEFAULT: "#1E40AF",
+                50: "#EBF5FF",
+                100: "#D6EAF8",
+                200: "#AED6F1",
+                300: "#85C1E9",
+                400: "#5DADE2",
+                500: "#3498DB",
+                600: "#2E86C1",
+                700: "#2874A6",
+                800: "#21618C",
+                900: "#1B4F72",
+              },
               slateBg: "#F8FAFC",
             },
             fontFamily: {
@@ -60,23 +70,32 @@
       .htmx-request .htmx-indicator {
         display: inline-flex;
       }
+      .dark .dark\:text-gray-200 {
+        color: #e5e7eb;
+      }
+      .dark .dark\:bg-gray-800 {
+        background-color: #1f2937;
+      }
+      .dark .dark\:border-gray-700 {
+        border-color: #374151;
+      }
     </style>
   </head>
-  <body class="bg-slateBg font-sans text-slate-800 antialiased">
+  <body class="bg-slateBg font-sans text-slate-800 antialiased dark:bg-gray-800 dark:text-gray-200">
     <div class="min-h-screen">
-      <aside class="fixed inset-y-0 left-0 hidden w-72 border-r border-slate-200 bg-white lg:block">
-        <div class="flex h-20 items-center border-b border-slate-100 px-6">
-          <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigoBrand/10 text-indigoBrand">
+      <aside class="fixed inset-y-0 left-0 hidden w-72 border-r border-slate-200 bg-white lg:block dark:bg-gray-800 dark:border-gray-700">
+        <div class="flex h-20 items-center border-b border-slate-100 px-6 dark:border-gray-700">
+          <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             {{ nav_icon("sparkles") }}
           </div>
           <div class="ml-3">
             <p class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">HR Analytics</p>
-            <h1 class="text-lg font-bold text-slate-900">Attrition Studio</h1>
+            <h1 class="text-lg font-bold text-slate-900 dark:text-gray-200">Attrition Studio</h1>
           </div>
         </div>
         <nav class="space-y-2 px-4 py-6">
           {% for item in nav_items %}
-            <a href="{{ item.path }}" aria-label="{{ item.label }}" class="{% if current_path == item.path %}bg-indigoBrand text-white shadow-sm{% else %}text-slate-600 hover:bg-slate-100 hover:text-slate-900{% endif %} flex items-center rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200">
+            <a href="{{ item.path }}" aria-label="{{ item.label }}" class="{% if current_path == item.path %}bg-primary text-white shadow-sm{% else %}text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-200 dark:hover:bg-gray-700{% endif %} flex items-center rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200">
               <span class="mr-3">{{ nav_icon(item.icon) }}</span>
               <span>{{ item.label }}</span>
             </a>
@@ -85,13 +104,13 @@
       </aside>
 
       <div id="mobile-sidebar" class="fixed inset-0 z-40 hidden bg-slate-900/40 lg:hidden">
-        <div class="absolute inset-y-0 left-0 w-72 bg-white shadow-xl">
-          <div class="flex items-center justify-between border-b border-slate-100 px-5 py-5">
+        <div class="absolute inset-y-0 left-0 w-72 bg-white shadow-xl dark:bg-gray-800">
+          <div class="flex items-center justify-between border-b border-slate-100 px-5 py-5 dark:border-gray-700">
             <div>
               <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Menu</p>
-              <p class="text-lg font-bold text-slate-900">Attrition Studio</p>
+              <p class="text-lg font-bold text-slate-900 dark:text-gray-200">Attrition Studio</p>
             </div>
-            <button type="button" aria-label="Close navigation" onclick="AttritionApp.toggleSidebar()" class="rounded-lg border border-slate-200 p-2 text-slate-600 transition-all duration-200 hover:bg-slate-100">
+            <button type="button" aria-label="Close navigation" onclick="AttritionApp.toggleSidebar()" class="rounded-lg border border-slate-200 p-2 text-slate-600 transition-all duration-200 hover:bg-slate-100 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-700">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-5 w-5 stroke-[1.8]">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 6 18 18M18 6 6 18"/>
               </svg>
@@ -99,7 +118,7 @@
           </div>
           <nav class="space-y-2 px-4 py-6">
             {% for item in nav_items %}
-              <a href="{{ item.path }}" aria-label="{{ item.label }}" class="{% if current_path == item.path %}bg-indigoBrand text-white shadow-sm{% else %}text-slate-600 hover:bg-slate-100 hover:text-slate-900{% endif %} flex items-center rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200">
+              <a href="{{ item.path }}" aria-label="{{ item.label }}" class="{% if current_path == item.path %}bg-primary text-white shadow-sm{% else %}text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-200 dark:hover:bg-gray-700{% endif %} flex items-center rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200">
                 <span class="mr-3">{{ nav_icon(item.icon) }}</span>
                 <span>{{ item.label }}</span>
               </a>
@@ -110,26 +129,26 @@
       </div>
 
       <div class="lg:pl-72">
-        <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
+        <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur dark:bg-gray-800/90 dark:border-gray-700">
           <div class="flex items-center justify-between px-4 py-4 sm:px-6">
             <div class="flex items-center gap-3">
-              <button type="button" aria-label="Open navigation" onclick="AttritionApp.toggleSidebar()" class="rounded-xl border border-slate-200 p-2 text-slate-600 transition-all duration-200 hover:bg-slate-100 lg:hidden">
+              <button type="button" aria-label="Open navigation" onclick="AttritionApp.toggleSidebar()" class="rounded-xl border border-slate-200 p-2 text-slate-600 transition-all duration-200 hover:bg-slate-100 lg:hidden dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-700">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-5 w-5 stroke-[1.8]">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 6.75h15M4.5 12h15m-15 5.25h15"/>
                 </svg>
               </button>
               <div>
                 <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{{ page_title }}</p>
-                <h2 class="text-xl font-bold text-slate-900 sm:text-2xl">{{ page_subtitle }}</h2>
+                <h2 class="text-xl font-bold text-slate-900 sm:text-2xl dark:text-gray-200">{{ page_subtitle }}</h2>
               </div>
             </div>
             <div class="flex items-center gap-3">
-              <button type="button" aria-label="Notifications" class="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 transition-all duration-200 hover:bg-slate-100">
+              <button type="button" aria-label="Notifications" class="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 transition-all duration-200 hover:bg-slate-100 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-700">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-5 w-5 stroke-[1.8]">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 18a2.25 2.25 0 1 1-4.5 0M6.75 9.75a5.25 5.25 0 1 1 10.5 0c0 2.402.577 4.77 1.68 6.904.12.232-.043.521-.305.521H5.375c-.262 0-.425-.29-.305-.52A15.2 15.2 0 0 0 6.75 9.75Z"/>
                 </svg>
               </button>
-              <div aria-label="User avatar placeholder" class="flex h-11 w-11 items-center justify-center rounded-full bg-indigoBrand text-sm font-bold text-white">
+              <div aria-label="User avatar placeholder" class="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
                 HR
               </div>
             </div>
@@ -141,9 +160,9 @@
         </main>
       </div>
 
-      <nav class="fixed inset-x-4 bottom-4 z-30 grid grid-cols-5 gap-2 rounded-2xl border border-slate-200 bg-white/95 p-2 shadow-xl backdrop-blur lg:hidden">
+      <nav class="fixed inset-x-4 bottom-4 z-30 grid grid-cols-5 gap-2 rounded-2xl border border-slate-200 bg-white/95 p-2 shadow-xl backdrop-blur lg:hidden dark:bg-gray-800/95 dark:border-gray-700">
         {% for item in nav_items %}
-          <a href="{{ item.path }}" aria-label="{{ item.label }}" class="{% if current_path == item.path %}bg-indigoBrand text-white{% else %}text-slate-500{% endif %} flex flex-col items-center justify-center rounded-xl px-2 py-2 text-[11px] font-medium transition-all duration-200">
+          <a href="{{ item.path }}" aria-label="{{ item.label }}" class="{% if current_path == item.path %}bg-primary text-white{% else %}text-slate-500 dark:text-gray-200{% endif %} flex flex-col items-center justify-center rounded-xl px-2 py-2 text-[11px] font-medium transition-all duration-200">
             <span>{{ nav_icon(item.icon) }}</span>
             <span class="mt-1">{{ item.label.split()[0] }}</span>
           </a>
