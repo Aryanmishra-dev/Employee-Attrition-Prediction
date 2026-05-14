@@ -1,13 +1,26 @@
 .DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Secrets
 .env
+!.env.example
+
+# Python artifacts
 __pycache__/
 *.py[cod]
+*.pyc
 *.pyo
 *.pyd
+*.egg-info/
+dist/
+build/
 
 # Virtual environments
 .venv/
 venv/
+env/
 test_venv/
 
 # Notebook and test caches
@@ -16,6 +29,36 @@ test_venv/
 .ruff_cache/
 .coverage
 htmlcov/
+coverage.xml
+
+# Logs
+*.log
+logs/
+
+# Model binaries
+*.pkl
+*.h5
+*.joblib
+*.pt
+*.onnx
+*.model
+
+# Training artifacts
+saved_models/
+catboost_info/
+mlruns/
+mlflow.db
+
+# Data files
+/data/**/*.csv
+/data/**/*.xlsx
+/data/**/*.json
+/app/data/**/*.csv
+/app/data/**/*.xlsx
+/app/data/**/*.json
+IBM-HR-Analytics*.csv
+!data/.gitkeep
+!app/data/.gitkeep
 
 # Runtime artifacts
 app/data/batches/

@@ -4,6 +4,14 @@ FastAPI and HTMX application for exploring employee attrition risk, scoring empl
 
 This repository is structured as a hardened MVP. It is suitable for demos, experimentation, and internal technical review. Before using real employee data, it is crucial to enable authentication, configure persistent storage outside the container, and complete the governance and security checklists below.
 
+## Project Overview
+
+Employee attrition prediction estimates the likelihood that an employee may leave an organization based on workforce, compensation, engagement, and job-history signals. This project turns that workflow into a deployable web application with single-employee scoring, CSV batch scoring, explainability, recommendations, analytics views, and operational deployment scaffolding.
+
+## Dataset
+
+The model workflow is based on the IBM HR Analytics Employee Attrition & Performance dataset from Kaggle. The raw CSV is intentionally excluded from Git because Kaggle-hosted datasets should not be redistributed through public repositories. Download the dataset from Kaggle for local training or experimentation, then keep it outside version control.
+
 ## Features
 
 - **Single and Batch Predictions**: Predict attrition risk for a single employee via a web form or API, and score entire employee batches from CSV files.
@@ -12,38 +20,55 @@ This repository is structured as a hardened MVP. It is suitable for demos, exper
 - **Model Insights**: Understand the model's behavior with a dedicated page for metrics, confusion matrix, feature importances, and training details.
 - **Lightweight & Secure**: Uses a lightweight NumPy inference artifact, includes security headers, optional authentication, upload/row limits, and is containerized with Docker.
 
-## Project Layout
+## Folder Structure
 
-```text
-app/
-  core/          # Settings and security middleware
-  models/        # Pydantic request/response schemas
-  routes/        # Page and API routes
-  services/      # Prediction, analytics, storage, recommendations, explanations
-  templates/     # Jinja2 pages and HTMX partials
-  ml_model/      # Packaged model artifact
-public/          # Browser JavaScript
-scripts/         # Training and smoke-test scripts
-docs/            # Review and README drafts
-tests/           # Unit tests
-```
+| Path | Purpose |
+| --- | --- |
+| `api/` | Deployment adapter entrypoints. |
+| `app/` | FastAPI application, routes, templates, services, schemas, settings, and model artifact location. |
+| `scripts/` | Training and smoke-test scripts. |
+| `tests/` | Unit and security tests. |
+| `docs/` | Technical review notes and README/API drafts. |
+| `public/` | Browser JavaScript and static assets. |
+| `ml-flow-of-ibm.ipynb` | Notebook-based ML workflow reference. |
+| `IBM-HR-Analytics-Employee-Attrition-and-*.ipynb` | Optional notebook reference if present locally. |
 
-## Quick Start
+## Setup
 
-1.  **Set up the environment:**
+1.  **Clone the repository:**
     ```bash
-    python3 -m venv .venv
-    source .venv/bin/activate
-    python3 -m pip install --upgrade pip
-    python3 -m pip install -r requirements.txt
+    git clone <repo-url>
+    cd employee_attrition_prediction_01
     ```
 
-2.  **Run the application:**
+2.  **Create and activate a virtual environment:**
+    ```bash
+    python -m venv .venv
+    source .venv/bin/activate
+    ```
+
+3.  **Install dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4.  **Create local configuration:**
+    ```bash
+    cp .env.example .env
+    ```
+    Fill in local values for secrets, storage, authentication, and deployment settings.
+
+5.  **Run the application locally:**
     ```bash
     uvicorn app.main:app --reload
     ```
 
-3.  **Access the application:**
+    Or run with Docker Compose:
+    ```bash
+    docker-compose up --build
+    ```
+
+6.  **Access the application:**
     Open your browser to `http://127.0.0.1:8000`.
 
 ## Configuration
@@ -56,12 +81,26 @@ cp .env.example .env
 
 Key environment variables:
 
+- `SECRET_KEY` / `API_KEY`: Placeholder secret values for integrations that require application or API credentials.
+- `DATABASE_URL`: Database connection string for future persistent storage.
+- `MODEL_PATH` / `SCALER_PATH`: Local model artifact paths.
+- `APP_ENV`, `HOST`, `PORT`, `DEBUG`: Runtime environment and server configuration.
 - `APP_RUNTIME_DATA_DIR`: Directory for storing runtime data.
 - `APP_MAX_UPLOAD_BYTES`: Maximum file upload size in bytes.
 - `APP_MAX_BATCH_ROWS`: Maximum number of rows in a batch CSV.
 - `APP_AUTH_TOKEN`: API token for bearer authentication.
 - `APP_AUTH_USERNAME` / `APP_AUTH_PASSWORD`: Credentials for basic web authentication.
 - `MEDIUM_RISK_THRESHOLD` / `HIGH_RISK_THRESHOLD`: Thresholds for risk categorization.
+- `MLFLOW_TRACKING_URI` / `MLFLOW_EXPERIMENT_NAME`: MLflow experiment tracking configuration.
+- `PYTHON_VERSION`: Python runtime hint for hosted deployment environments.
+
+## Results
+
+| Model | Accuracy | AUC-ROC | F1 | Precision | Recall |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Logistic Regression | 0.7823 | 0.8108 | 0.4754 | 0.3867 | 0.6170 |
+
+These metrics are from the current serialized training artifact generated by `scripts/train_model.py`. The project summary notes that the MVP now includes a deployable model, FastAPI backend, HTMX/Jinja2 UI, batch scoring, explainability, recommendations, analytics dashboards, containerization, Render configuration, and smoke testing.
 
 ## API Endpoints
 
@@ -76,6 +115,10 @@ For detailed API documentation, start the application and visit `http://127.0.0.
 
 ## Testing
 
+- **Test Wrapper**:
+  ```bash
+  python run_test.py
+  ```
 - **Smoke Test**:
   ```bash
   python3 scripts/smoke_test.py
@@ -83,12 +126,12 @@ For detailed API documentation, start the application and visit `http://127.0.0.
 - **Unit Tests**:
   ```bash
   python3 -m pip install -r requirements-dev.txt
-  python3 -m pytest
+  pytest tests/
   ```
 
 ## Training
 
-The model artifact (`app/ml_model/model.pkl`) can be rebuilt using the training script.
+The model artifact (`app/ml_model/model.pkl`) can be rebuilt using the training script. Model binaries are ignored by Git, so train locally or provide artifacts through your deployment process before running inference in a fresh clone.
 
 ```bash
 python3 -m pip install -r requirements-train.txt
@@ -97,7 +140,7 @@ python3 scripts/train_model.py
 
 The current model is a Logistic Regression classifier. The training script saves the model's coefficients and scaler statistics for lightweight, NumPy-based inference at runtime.
 
-## Docker
+## Deployment
 
 Build and run the application using Docker Compose:
 
@@ -106,6 +149,8 @@ docker compose up --build
 ```
 
 The application will be available at `http://127.0.0.1:8000`.
+
+`docker-compose.yml` supports local containerized development with runtime data mounted from `app/data`. `render.yaml` defines the Render.com web service, Docker command, health check path, and deployment environment variables.
 
 ## Security and Production Readiness
 
@@ -124,4 +169,3 @@ This application has been hardened but requires further steps for production use
 - The included IBM HR dataset is for demonstration purposes and may not reflect a real-world workforce.
 - The current file-based storage is not suitable for multi-worker or distributed deployments.
 - Predictions should be used for decision support and reviewed by a human, not for automated employment decisions.
-
