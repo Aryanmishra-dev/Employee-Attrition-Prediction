@@ -1,0 +1,23 @@
+services:
+  web:
+    build:
+      context: ../../
+      dockerfile: backend/Dockerfile.backend
+    container_name: employee-attrition
+    ports:
+      - "${HOST_PORT:-8000}:8000"
+    environment:
+      PORT: 8000
+      APP_RUNTIME_DATA_DIR: /app/app/data
+      APP_MAX_UPLOAD_BYTES: ${APP_MAX_UPLOAD_BYTES:-2000000}
+      APP_MAX_BATCH_ROWS: ${APP_MAX_BATCH_ROWS:-5000}
+      APP_ALLOWED_HOSTS: ${APP_ALLOWED_HOSTS:-*}
+      APP_ALLOWED_ORIGINS: ${APP_ALLOWED_ORIGINS:-}
+      APP_AUTH_TOKEN: ${APP_AUTH_TOKEN:-}
+      APP_AUTH_USERNAME: ${APP_AUTH_USERNAME:-}
+      APP_AUTH_PASSWORD: ${APP_AUTH_PASSWORD:-}
+      HIGH_RISK_THRESHOLD: ${HIGH_RISK_THRESHOLD:-0.65}
+      MEDIUM_RISK_THRESHOLD: ${MEDIUM_RISK_THRESHOLD:-0.35}
+    volumes:
+      - ../../backend/app/data:/app/backend/app/data
+    restart: unless-stopped

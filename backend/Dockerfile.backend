@@ -1,0 +1,30 @@
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PYTHONPATH=/app/backend
+
+WORKDIR /app
+
+COPY backend/requirements.txt ./
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+# We copy everything needed.
+# Since PYTHONPATH is /app/backend, we should place the backend folder inside /app.
+COPY backend ./backend
+COPY frontend ./frontend
+COPY config ./config
+COPY shared ./shared
+COPY deployment ./deployment
+COPY ml ./ml
+
+RUN mkdir -p /app/backend/app/data/batches \
+    && adduser --disabled-password --gecos "" appuser \
+    && chown -R appuser:appuser /app
+
+USER appuser
+
+EXPOSE 8000
+
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
