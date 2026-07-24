@@ -1,173 +1,165 @@
 # Employee Attrition Prediction
 
-FastAPI and HTMX application for exploring employee attrition risk, scoring employee CSV batches, and reviewing model explanations for HR analytics workflows.
+A full-stack web application for predicting employee attrition risk using machine learning. Built with FastAPI, HTMX, and a Logistic Regression model, it provides single-employee scoring, CSV batch processing, model explainability, and an analytics dashboard.
 
-This repository is structured as a hardened MVP. It is suitable for demos, experimentation, and internal technical review. Before using real employee data, it is crucial to enable authentication, configure persistent storage outside the container, and complete the governance and security checklists below.
+---
 
-## Project Overview
+## Overview
 
-Employee attrition prediction estimates the likelihood that an employee may leave an organization based on workforce, compensation, engagement, and job-history signals. This project turns that workflow into a deployable web application with single-employee scoring, CSV batch scoring, explainability, recommendations, analytics views, and operational deployment scaffolding.
+Employee attrition prediction estimates the likelihood that an employee may leave an organization based on workforce, compensation, engagement, and job-history signals. This application operationalizes that workflow into a deployable web service with:
+
+- **Single & Batch Predictions** — Score individuals via a web form or API, or process entire employee rosters from CSV uploads.
+- **Employee Profiles** — View per-employee risk drivers, actionable HR recommendations, and satisfaction radar charts.
+- **Analytics Dashboard** — Explore aggregate risk trends across departments, age groups, income levels, and feature importance.
+- **Model Insights** — Inspect model metrics, confusion matrix, feature importances, and training details.
+- **Explainability & Recommendations** — Understand *why* a prediction was made, with rule-based suggestions for at-risk employees.
 
 ## Dataset
 
-The model workflow is based on the IBM HR Analytics Employee Attrition & Performance dataset from Kaggle. The raw CSV is intentionally excluded from Git because Kaggle-hosted datasets should not be redistributed through public repositories. Download the dataset from Kaggle for local training or experimentation, then keep it outside version control.
+The model is trained on the [IBM HR Analytics Employee Attrition & Performance](https://www.kaggle.com/datasets/pavansubhasht/ibm-hr-analytics-attrition-dataset) dataset from Kaggle. The raw CSV is excluded from version control; download it from Kaggle for local training.
 
-## Features
+## Architecture
 
-- **Single and Batch Predictions**: Predict attrition risk for a single employee via a web form or API, and score entire employee batches from CSV files.
-- **Employee Profiles**: View detailed profiles for each employee, including risk drivers, actionable recommendations, and a satisfaction radar chart.
-- **Analytics Dashboard**: Explore aggregate risk trends with interactive charts for departments, age groups, and income levels.
-- **Model Insights**: Understand the model's behavior with a dedicated page for metrics, confusion matrix, feature importances, and training details.
-- **Lightweight & Secure**: Uses a lightweight NumPy inference artifact, includes security headers, optional authentication, upload/row limits, and is containerized with Docker.
+```
+├── frontend/          Jinja2 templates, HTMX partials, static assets (Tailwind CSS)
+├── backend/           FastAPI application — routes, services, schemas, middleware
+├── ml/                Training pipelines, feature engineering, model artifacts
+├── shared/            Shared constants, field mappings, form builders
+├── config/            Environment variable templates
+├── deployment/        Docker, Render config, CI/CD scaffolding, smoke tests
+├── tests/             Unit, integration, and end-to-end tests
+├── data/              Raw, processed, and external data directories
+├── monitoring/        Dashboard, alert, and metrics placeholders
+└── docs/              Technical documentation, runbooks, architecture notes
+```
 
-## Folder Structure
+## Tech Stack
 
-| Path | Purpose |
-| --- | --- |
-| `frontend/` | UI templates, HTMX components, and static assets. |
-| `backend/` | FastAPI application, routes, services, schemas, and configurations. |
-| `ml/` | Training pipelines, ML feature engineering, and experiments. |
-| `data/` | Raw and processed data storage. |
-| `shared/` | Shared utilities and constants. |
-| `config/` | Environment configurations. |
-| `deployment/` | Docker, Render deploy configuration, and run scripts. |
-| `monitoring/` | Dashboards, alerts, and metrics. |
-| `tests/` | Unit, integration, and E2E tests. |
-| `docs/` | Technical documentation and runbooks. |
+| Layer | Technology |
+|---|---|
+| Backend | Python 3.11, FastAPI, Uvicorn |
+| Frontend | Jinja2, HTMX, Tailwind CSS (CDN), Chart.js |
+| ML Model | Logistic Regression (scikit-learn), NumPy inference |
+| Storage | JSONL append-only logs, CSV batch storage |
+| Containerization | Docker, Docker Compose |
+| Deployment | Render.com |
+| Testing | Pytest, Ruff (linting) |
 
 ## Setup
 
-1.  **Clone the repository:**
-    ```bash
-    git clone <repo-url>
-    cd employee_attrition_prediction_01
-    ```
-
-2.  **Create and activate a virtual environment:**
-    ```bash
-    python -m venv .venv
-    source .venv/bin/activate
-    ```
-
-3.  **Install dependencies:**
-    ```bash
-    pip install -r backend/requirements.txt
-    ```
-
-4.  **Create local configuration:**
-    ```bash
-    cp .env.example .env
-    ```
-    Fill in local values for secrets, storage, authentication, and deployment settings.
-
-5.  **Run the application locally:**
-    ```bash
-    uvicorn backend.app.main:app --reload
-    ```
-
-    Or run with Docker Compose:
-    ```bash
-    docker-compose -f deployment/docker/docker-compose.yml up --build
-    ```
-
-6.  **Access the application:**
-    Open your browser to `http://127.0.0.1:8000`.
-
-## Configuration
-
-Configuration is managed via environment variables. Copy the example file and customize it for your environment:
+### Local Development
 
 ```bash
-cp .env.example .env
+# Clone the repository
+git clone <repo-url>
+cd employee-attrition-prediction
+
+# Create and activate virtual environment
+python -m venv .venv
+source .venv/bin/activate
+
+# Install dependencies
+pip install -r backend/requirements.txt
+
+# Configure environment
+cp config/.env.example .env
+
+# Run the application
+uvicorn backend.app.main:app --reload
 ```
 
-Key environment variables:
+Open your browser to **http://127.0.0.1:8000**.
 
-- `SECRET_KEY` / `API_KEY`: Placeholder secret values for integrations that require application or API credentials.
-- `DATABASE_URL`: Database connection string for future persistent storage.
-- `MODEL_PATH` / `SCALER_PATH`: Local model artifact paths.
-- `APP_ENV`, `HOST`, `PORT`, `DEBUG`: Runtime environment and server configuration.
-- `APP_RUNTIME_DATA_DIR`: Directory for storing runtime data.
-- `APP_MAX_UPLOAD_BYTES`: Maximum file upload size in bytes.
-- `APP_MAX_BATCH_ROWS`: Maximum number of rows in a batch CSV.
-- `APP_AUTH_TOKEN`: API token for bearer authentication.
-- `APP_AUTH_USERNAME` / `APP_AUTH_PASSWORD`: Credentials for basic web authentication.
-- `MEDIUM_RISK_THRESHOLD` / `HIGH_RISK_THRESHOLD`: Thresholds for risk categorization.
-- `MLFLOW_TRACKING_URI` / `MLFLOW_EXPERIMENT_NAME`: MLflow experiment tracking configuration.
-- `PYTHON_VERSION`: Python runtime hint for hosted deployment environments.
-
-## Results
-
-| Model | Accuracy | AUC-ROC | F1 | Precision | Recall |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Logistic Regression | 0.7823 | 0.8108 | 0.4754 | 0.3867 | 0.6170 |
-
-These metrics are from the current serialized training artifact generated by `ml/pipelines/training/train_model.py`. The project summary notes that the MVP now includes a deployable model, FastAPI backend, HTMX/Jinja2 UI, batch scoring, explainability, recommendations, analytics dashboards, containerization, Render configuration, and smoke testing.
-
-## API Endpoints
-
-The API provides programmatic access to the application's features.
-
-- `GET /health`: Health check endpoint.
-- `POST /api/predict`: Predict attrition for a single employee.
-- `POST /api/batch-predict`: Score a batch of employees from a CSV file.
-- `GET /api/employee/{employee_id}`: Retrieve an employee's profile and risk analysis.
-
-For detailed API documentation, start the application and visit `http://127.0.0.1:8000/docs`.
-
-## Testing
-
-- **Test Wrapper**:
-  ```bash
-  python deployment/scripts/run_test.py
-  ```
-- **Smoke Test**:
-  ```bash
-  python deployment/scripts/smoke_test.py
-  ```
-- **Unit Tests**:
-  ```bash
-  python3 -m pip install -r backend/requirements-dev.txt
-  pytest -c backend/pyproject.toml
-  ```
-
-## Training
-
-The model artifact (`app/ml_model/model.pkl`) can be rebuilt using the training script. Model binaries are ignored by Git, so train locally or provide artifacts through your deployment process before running inference in a fresh clone.
-
-```bash
-python3 -m pip install -r ml/requirements-train.txt
-python3 ml/pipelines/training/train_model.py
-```
-
-The current model is a Logistic Regression classifier. The training script saves the model's coefficients and scaler statistics for lightweight, NumPy-based inference at runtime.
-
-## Deployment
-
-Build and run the application using Docker Compose:
+### Docker
 
 ```bash
 docker compose -f deployment/docker/docker-compose.yml up --build
 ```
 
-The application will be available at `http://127.0.0.1:8000`.
+## Model Performance
 
-`deployment/docker/docker-compose.yml` supports local containerized development with runtime data mounted from `backend/app/data`. `deployment/render/render.yaml` defines the Render.com web service, Docker command, health check path, and deployment environment variables.
+| Metric | Value |
+|---|---|
+| Accuracy | 0.7823 |
+| AUC-ROC | 0.8108 |
+| F1 Score | 0.4754 |
+| Precision | 0.3867 |
+| Recall | 0.6170 |
 
-## Security and Production Readiness
+The model uses class weighting and threshold optimization (tuned for F2 score with a minimum accuracy constraint of 0.78) to favor recall, reducing the likelihood of missing at-risk employees.
 
-This application has been hardened but requires further steps for production use with sensitive data.
+## API Endpoints
 
-### Critical Production Steps:
+| Method | Path | Description |
+|---|---|---|
+| GET | `/health` | Health check |
+| POST | `/api/predict` | Predict attrition for a single employee |
+| POST | `/api/batch-predict` | Score a batch of employees from CSV |
+| GET | `/api/employee/{id}` | Retrieve employee profile and risk analysis |
 
-- **Authentication & Authorization**: Integrate with a production-grade authentication system (e.g., SSO/OIDC) and implement Role-Based Access Control (RBAC).
-- **Secure Data Storage**: Replace local file storage with a managed, encrypted database (e.g., Postgres) and object storage for sensitive data like prediction logs and employee notes.
-- **Asynchronous Task Handling**: Move large batch processing to a background job queue to prevent blocking server resources.
-- **Model Governance**: Implement a full model governance workflow, including versioning, fairness and bias audits, calibration, and drift monitoring.
-- **Web Security**: Enforce HTTPS, add CSRF protection, implement rate limiting, and use a strict Content Security Policy (CSP).
+Full interactive API documentation is available at **http://127.0.0.1:8000/docs** when the application is running.
 
-### Limitations:
+## Testing
 
-- The included IBM HR dataset is for demonstration purposes and may not reflect a real-world workforce.
-- The current file-based storage is not suitable for multi-worker or distributed deployments.
-- Predictions should be used for decision support and reviewed by a human, not for automated employment decisions.
+```bash
+# Smoke tests
+python deployment/scripts/smoke_test.py
+
+# Unit tests
+pip install -r backend/requirements-dev.txt
+pytest -c backend/pyproject.toml
+```
+
+## Training
+
+To retrain the model:
+
+```bash
+pip install -r ml/requirements-train.txt
+python ml/pipelines/training/train_model.py
+```
+
+The training script serializes model coefficients, scaler statistics, and metadata into a lightweight artifact used for NumPy-based inference at runtime.
+
+## Configuration
+
+Key environment variables (see `config/.env.example`):
+
+| Variable | Description |
+|---|---|
+| `SECRET_KEY` / `API_KEY` | Placeholder credentials for integrations |
+| `DATABASE_URL` | Database connection string |
+| `MODEL_PATH` / `SCALER_PATH` | Model artifact paths |
+| `APP_AUTH_TOKEN` | Bearer token for API authentication |
+| `APP_AUTH_USERNAME` / `APP_AUTH_PASSWORD` | Basic auth credentials |
+| `MEDIUM_RISK_THRESHOLD` / `HIGH_RISK_THRESHOLD` | Risk categorization thresholds (0.35 / 0.65) |
+| `APP_MAX_UPLOAD_BYTES` | Max CSV upload size (default: 2 MB) |
+| `APP_MAX_BATCH_ROWS` | Max rows per batch (default: 5000) |
+
+## Deployment
+
+The application includes a Render.com deployment configuration:
+
+```bash
+docker compose -f deployment/docker/docker-compose.yml up --build
+```
+
+See `deployment/render/render.yaml` for Render service configuration and `deployment/docker/docker-compose.yml` for local containerized development.
+
+## Production Readiness
+
+This application has been hardened for demonstration and internal review but requires additional steps before handling sensitive data:
+
+- **Authentication** — Integrate SSO/OIDC and role-based access control.
+- **Data Storage** — Replace local file storage with a managed database and encrypted object storage.
+- **Background Processing** — Move large batch jobs to a task queue.
+- **Model Governance** — Implement versioning, bias audits, calibration, and drift monitoring.
+- **Web Security** — Enforce HTTPS, add CSRF protection, rate limiting, and a strict Content Security Policy.
+
+Predictions are intended for decision support and should be reviewed by a human, not used for automated employment decisions.
+
+---
+
+## License
+
+This project is provided for demonstration and educational purposes.
