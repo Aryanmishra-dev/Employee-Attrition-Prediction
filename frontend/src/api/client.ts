@@ -1,5 +1,5 @@
 import axios, { AxiosError } from 'axios';
-import {
+import type {
   PredictionResponse,
   BatchPredictionResponse,
   EmployeeProfileData,

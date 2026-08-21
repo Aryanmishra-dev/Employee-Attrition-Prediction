@@ -1,12 +1,12 @@
 # Employee Attrition Prediction
 
-A full-stack web application for predicting employee attrition risk using machine learning. Built with FastAPI, HTMX, and a Logistic Regression model, it provides single-employee scoring, CSV batch processing, model explainability, and an analytics dashboard.
+A full-stack web application for predicting employee attrition risk using machine learning. Built with FastAPI (Backend) and React + Vite (Frontend), it provides single-employee scoring, CSV batch processing, model explainability, and an analytics dashboard.
 
 ---
 
 ## Overview
 
-Employee attrition prediction estimates the likelihood that an employee may leave an organization based on workforce, compensation, engagement, and job-history signals. This application operationalizes that workflow into a deployable web service with:
+Employee attrition prediction estimates the likelihood that an employee may leave an organization based on workforce, compensation, engagement, and job-history signals. This application operationalizes that workflow into a deployable web service with a modern, industry-grade UI:
 
 - **Single & Batch Predictions** — Score individuals via a web form or API, or process entire employee rosters from CSV uploads.
 - **Employee Profiles** — View per-employee risk drivers, actionable HR recommendations, and satisfaction radar charts.
@@ -20,8 +20,8 @@ The model is trained on the [IBM HR Analytics Employee Attrition & Performance](
 
 ## Architecture
 
-```
-├── frontend/          Jinja2 templates, HTMX partials, static assets (Tailwind CSS)
+```text
+├── frontend/          React SPA built with Vite, TypeScript, and Tailwind CSS
 ├── backend/           FastAPI application — routes, services, schemas, middleware
 ├── ml/                Training pipelines, feature engineering, model artifacts
 ├── shared/            Shared constants, field mappings, form builders
@@ -37,17 +37,19 @@ The model is trained on the [IBM HR Analytics Employee Attrition & Performance](
 
 | Layer | Technology |
 |---|---|
-| Backend | Python 3.11, FastAPI, Uvicorn |
-| Frontend | Jinja2, HTMX, Tailwind CSS (CDN), Chart.js |
-| ML Model | Logistic Regression (scikit-learn), NumPy inference |
-| Storage | JSONL append-only logs, CSV batch storage |
-| Containerization | Docker, Docker Compose |
-| Deployment | Render.com |
-| Testing | Pytest, Ruff (linting) |
+| **Backend** | Python 3.11, FastAPI, Uvicorn |
+| **Frontend** | React, Vite, TypeScript, Tailwind CSS, Lucide React, Chart.js |
+| **ML Model** | Logistic Regression (scikit-learn), NumPy inference |
+| **Storage** | JSONL append-only logs, CSV batch storage |
+| **Containerization** | Docker, Docker Compose |
+| **Deployment** | Render.com |
+| **Testing** | Pytest, Ruff (linting), Vitest (Frontend) |
 
 ## Setup
 
 ### Local Development
+
+#### 1. Backend Setup
 
 ```bash
 # Clone the repository
@@ -64,11 +66,27 @@ pip install -r backend/requirements.txt
 # Configure environment
 cp config/.env.example .env
 
-# Run the application
+# Run the backend
 uvicorn backend.app.main:app --reload
 ```
 
-Open your browser to **http://127.0.0.1:8000**.
+The backend API will be available at **http://127.0.0.1:8000**.
+
+#### 2. Frontend Setup
+
+Open a new terminal window:
+
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Run the development server
+npm run dev
+```
+
+The frontend will be available at **http://localhost:5173** (or as indicated in the terminal).
 
 ### Docker
 
@@ -97,18 +115,7 @@ The model uses class weighting and threshold optimization (tuned for F2 score wi
 | POST | `/api/batch-predict` | Score a batch of employees from CSV |
 | GET | `/api/employee/{id}` | Retrieve employee profile and risk analysis |
 
-Full interactive API documentation is available at **http://127.0.0.1:8000/docs** when the application is running.
-
-## Testing
-
-```bash
-# Smoke tests
-python deployment/scripts/smoke_test.py
-
-# Unit tests
-pip install -r backend/requirements-dev.txt
-pytest -c backend/pyproject.toml
-```
+Full interactive API documentation is available at **http://127.0.0.1:8000/docs** when the backend is running.
 
 ## Training
 
@@ -120,21 +127,6 @@ python ml/pipelines/training/train_model.py
 ```
 
 The training script serializes model coefficients, scaler statistics, and metadata into a lightweight artifact used for NumPy-based inference at runtime.
-
-## Configuration
-
-Key environment variables (see `config/.env.example`):
-
-| Variable | Description |
-|---|---|
-| `SECRET_KEY` / `API_KEY` | Placeholder credentials for integrations |
-| `DATABASE_URL` | Database connection string |
-| `MODEL_PATH` / `SCALER_PATH` | Model artifact paths |
-| `APP_AUTH_TOKEN` | Bearer token for API authentication |
-| `APP_AUTH_USERNAME` / `APP_AUTH_PASSWORD` | Basic auth credentials |
-| `MEDIUM_RISK_THRESHOLD` / `HIGH_RISK_THRESHOLD` | Risk categorization thresholds (0.35 / 0.65) |
-| `APP_MAX_UPLOAD_BYTES` | Max CSV upload size (default: 2 MB) |
-| `APP_MAX_BATCH_ROWS` | Max rows per batch (default: 5000) |
 
 ## Deployment
 
