@@ -36,11 +36,17 @@ const Dashboard: React.FC = () => {
       {
         label: 'Predicted Attrition Risk',
         data: [12, 19, 15, 22, 18, 14],
-        backgroundColor: 'rgba(79, 70, 229, 0.2)',
-        borderColor: 'rgba(79, 70, 229, 1)',
-        borderWidth: 2,
+        backgroundColor: 'rgba(124, 58, 237, 0.1)',
+        borderColor: 'rgba(124, 58, 237, 0.8)',
+        borderWidth: 3,
         fill: true,
         tension: 0.4,
+        pointBackgroundColor: 'rgba(124, 58, 237, 1)',
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgba(124, 58, 237, 1)',
+        pointRadius: 4,
+        pointHoverRadius: 6,
       },
     ],
   };
@@ -51,8 +57,10 @@ const Dashboard: React.FC = () => {
       {
         label: 'High Risk Employees',
         data: [15, 8, 3, 24, 7],
-        backgroundColor: 'rgba(239, 68, 68, 0.8)',
-        borderRadius: 4,
+        backgroundColor: 'rgba(124, 58, 237, 0.7)',
+        borderRadius: 8,
+        borderWidth: 0,
+        hoverBackgroundColor: 'rgba(124, 58, 237, 1)',
       },
     ],
   };
@@ -130,28 +138,28 @@ const Dashboard: React.FC = () => {
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm text-slate-600 dark:text-gray-300">
-              <thead className="bg-slate-50 dark:bg-gray-800/50 text-xs uppercase text-slate-500 dark:text-gray-400 border-b border-slate-200 dark:border-gray-700">
+              <thead className="bg-slate-100/50 dark:bg-gray-800/50 text-xs uppercase text-slate-500 dark:text-gray-400 border-b border-slate-200/50 dark:border-gray-700/50 backdrop-blur-md">
                 <tr>
-                  <th className="px-6 py-4 font-medium">Employee ID</th>
-                  <th className="px-6 py-4 font-medium">Department</th>
-                  <th className="px-6 py-4 font-medium">Job Role</th>
-                  <th className="px-6 py-4 font-medium">Risk Score</th>
-                  <th className="px-6 py-4 font-medium">Status</th>
+                  <th className="px-6 py-4 font-semibold tracking-wider">Employee ID</th>
+                  <th className="px-6 py-4 font-semibold tracking-wider">Department</th>
+                  <th className="px-6 py-4 font-semibold tracking-wider">Job Role</th>
+                  <th className="px-6 py-4 font-semibold tracking-wider">Risk Score</th>
+                  <th className="px-6 py-4 font-semibold tracking-wider">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-gray-700">
+              <tbody className="divide-y divide-slate-100 dark:divide-gray-700/50">
                 {[
                   { id: 'EMP-0182', dept: 'Sales', role: 'Sales Executive', score: 0.89 },
                   { id: 'EMP-0245', dept: 'Engineering', role: 'Software Engineer', score: 0.82 },
                   { id: 'EMP-0311', dept: 'R&D', role: 'Research Scientist', score: 0.76 },
                 ].map((emp) => (
-                  <tr key={emp.id} className="hover:bg-slate-50 dark:hover:bg-gray-800/50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-slate-900 dark:text-gray-100">{emp.id}</td>
+                  <tr key={emp.id} className="hover:bg-slate-50/80 dark:hover:bg-gray-800/80 transition-colors group">
+                    <td className="px-6 py-4 font-medium text-slate-900 dark:text-gray-100 group-hover:text-primary transition-colors">{emp.id}</td>
                     <td className="px-6 py-4">{emp.dept}</td>
                     <td className="px-6 py-4">{emp.role}</td>
-                    <td className="px-6 py-4 font-mono">{(emp.score * 100).toFixed(1)}%</td>
+                    <td className="px-6 py-4 font-mono font-medium">{(emp.score * 100).toFixed(1)}%</td>
                     <td className="px-6 py-4">
-                      <Badge variant={emp.score > 0.8 ? 'danger' : 'warning'}>
+                      <Badge variant={emp.score > 0.8 ? 'danger' : 'warning'} className="shadow-sm">
                         {emp.score > 0.8 ? 'Critical' : 'High'}
                       </Badge>
                     </td>

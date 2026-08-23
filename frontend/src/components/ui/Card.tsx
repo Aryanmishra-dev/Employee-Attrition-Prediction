@@ -10,7 +10,7 @@ export const Card: React.FC<CardProps> = ({ className, glass = false, children, 
     <div
       className={cn(
         'rounded-2xl overflow-hidden transition-all duration-300',
-        glass ? 'glass' : 'bg-white dark:bg-gray-800 shadow-sm border border-slate-100 dark:border-gray-700 hover:shadow-md dark:hover:border-gray-600',
+        glass ? 'glass-card' : 'bg-white/80 dark:bg-gray-800/80 backdrop-blur shadow-sm border border-slate-100 dark:border-gray-700 hover:shadow-md hover:border-primary/20 dark:hover:border-primary/30',
         className
       )}
       {...props}

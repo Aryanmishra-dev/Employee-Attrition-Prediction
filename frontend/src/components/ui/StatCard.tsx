@@ -23,7 +23,7 @@ export const StatCard: React.FC<StatCardProps> = ({
   className,
 }) => {
   return (
-    <Card className={cn('animate-slide-up', className)}>
+    <Card glass className={cn('animate-slide-up hover:-translate-y-1', className)}>
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div>
